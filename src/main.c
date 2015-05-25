@@ -3,8 +3,39 @@
 #include <string.h>
 #include <stdlib.h>
 
-void process_cmd(const char *cmd_line, size_t line_len) {
-	printf("Got line of size %zu: %s\n", line_len, cmd_line);
+#define CMDS_DELIM ";"
+
+/*
+char **build_argv(char *cmd_line, size_t line_len) {
+	char **argv = malloc(line_len*sizeof(*argv));
+
+	if (argv == NULL) {
+		return NULL;
+	}
+
+	size_t i;
+	
+}
+*/
+
+void process_cmd(char *cmd_line) {
+	printf("Process command: %s\n", cmd_line);
+}
+
+void process_cmd_line(char *cmd_line) {
+	static const char *delim = CMDS_DELIM;
+	char *saveptr = NULL;
+	char *next_tok;
+
+	if ((next_tok = strtok_r(cmd_line, delim, &saveptr)) == NULL) {
+		return;
+	}
+
+	process_cmd(next_tok);
+
+	while ((next_tok = strtok_r(NULL, delim, &saveptr)) != NULL) {
+		process_cmd(next_tok);
+	}
 }
 
 int main(void) {
@@ -30,7 +61,7 @@ int main(void) {
 		}
 
 		if (line_len > 0) {
-			process_cmd(line, line_len);
+			process_cmd_line(line);
 		}
 
 		printf("fsh: > ");
