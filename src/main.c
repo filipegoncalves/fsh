@@ -2,9 +2,31 @@
 #include <errno.h>
 #include <string.h>
 #include <stdlib.h>
+#include <unistd.h>
+#include <sys/types.h>
+#include <sys/wait.h>
 
 #define CMDS_DELIM ";"
 
+void execute_cmd(char *argv[]) {
+	pid_t f;
+
+	if ((f = fork()) < 0) {
+		perror("Couldn't fork");
+		return;
+	}
+
+	if (f == 0) {
+		if (execvp(argv[0], argv) < 0) {
+			// TODO Enhance error reporting
+			perror("execvp() failed");
+			exit(0);
+		}
+	} else {
+		waitpid(f, NULL, 0);
+	}
+
+}
 
 char **build_argv(char *cmd) {
 	char **argv = malloc((strlen(cmd)+1)*sizeof(*argv));
@@ -33,15 +55,13 @@ void process_cmd(char *cmd) {
 	char **argv = build_argv(cmd);
 
 	if (argv == NULL) {
-		printf("Null argv\n");
+		fprintf(stderr, "Warning: got null argv for command %s\n", cmd);
 		return;
 	}
 
-	printf("Processed command: %s\n", cmd);
-	size_t i;
-	for (i = 0; argv[i] != NULL; i++) {
-		printf("argv[%zu] = %s\n", i, argv[i]);
-	}
+	execute_cmd(argv);
+
+	free(argv);
 }
 
 void process_cmd_line(char *cmd_line) {
