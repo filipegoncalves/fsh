@@ -54,12 +54,21 @@ char **build_argv(char *cmd) {
 void process_cmd(char *cmd) {
 	char **argv = build_argv(cmd);
 
-	if (argv == NULL) {
+	if (argv == NULL || argv[0] == NULL) {
 		fprintf(stderr, "Warning: got null argv for command %s\n", cmd);
 		return;
 	}
 
-	execute_cmd(argv);
+	if (!strcmp(argv[0], "cd")) {
+		if (argv[1] != NULL) {
+			if (chdir(argv[1]) < 0) {
+				fprintf(stderr, "cd: %s: ", argv[1]);
+				perror(NULL);
+			}
+		}
+	} else {
+		execute_cmd(argv);
+	}
 
 	free(argv);
 }
