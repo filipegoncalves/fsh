@@ -17,3 +17,17 @@ There is much, much more to say about a shell. I consider these to be part of a 
 The shell is very primitive right now; it can be compiled and executed as any other program.
 
 To really use it as a shell, create a user and edit that user's entry in `/etc/passwd` so as to point the shell executable path to the path of the compiled binary of `fsh`. Upon login, the system will run `fsh` as the user's shell.
+
+Example for user `fshtest` after copying the compiled binary into `/bin/fsh`:
+
+```
+# emacs /etc/passwd
+```
+
+Find the entry for `fshtest`. It's similar to this:
+
+```
+fshtest:x:1001:1002:,,,:/home/fshtest:/bin/bash
+```
+
+Change `/bin/bash` to `/bin/fsh`, save and exit. Login with the user `fshtest` (you can switch to `fshtest` with `su - fshtest`) and you're done.
