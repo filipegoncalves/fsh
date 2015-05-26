@@ -7,7 +7,7 @@ Right now, it supports basic command execution and filesystem navigation (with t
 My goal with this project is to learn about UNIX/Linux internals. Here are some important milestones that I'd like to reach in the near future:
 
 - [ ] Job control (e.g. `./myprog &` to run in the background)
-- [ ] Pipes
+- [X] Pipes
 - [ ] stdin and stdout file redirection with `<` and `>` (and also support append mode with `>>`)
 
 There is much, much more to say about a shell. I consider these to be part of a shell's core functionality, so I'll start by working on them.
