@@ -3,13 +3,59 @@
 #include <string.h>
 #include <stdlib.h>
 #include <unistd.h>
+#include <fcntl.h>
 #include <sys/types.h>
 #include <sys/wait.h>
 
 #define CMDS_DELIM ";"
 
+int pipe_exec(char *argv[]) {
+	int pipefd[2];
+	pid_t f;
+
+	if (pipe(pipefd) < 0) {
+		fprintf(stderr, "%s: couldn't create pipe", argv[0]);
+		perror(NULL);
+		return -1;
+	}
+
+	if ((f = fork()) < 0) {
+		fprintf(stderr, "%s", argv[0]);
+		perror(NULL);
+		return -1;
+	}
+
+	if (f == 0) {
+		dup2(pipefd[1], STDOUT_FILENO);
+		close(pipefd[0]);
+		if (execvp(argv[0], argv) < 0) {
+			perror("execvp() failed");
+			exit(EXIT_FAILURE);
+		}
+	} else {
+		dup2(pipefd[0], STDIN_FILENO);
+		close(pipefd[1]);
+	}
+	return 0;
+}
+
 void execute_cmd(char *argv[]) {
 	pid_t f;
+	size_t i, j;
+
+	int stdin_saved = fcntl(STDIN_FILENO, F_DUPFD_CLOEXEC, 0);
+	if (stdin_saved < 0) {
+		perror("Unable to dup stdin");
+		return;
+	}
+
+	for (i = 0, j = 0; argv[i] != NULL; i++) {
+		if (!strcmp(argv[i], "|")) {
+			argv[i] = NULL;
+			pipe_exec(&argv[j]);
+			j = i+1;
+		}
+	}
 
 	if ((f = fork()) < 0) {
 		perror("Couldn't fork");
@@ -17,12 +63,14 @@ void execute_cmd(char *argv[]) {
 	}
 
 	if (f == 0) {
-		if (execvp(argv[0], argv) < 0) {
+		if (execvp(argv[j], &argv[j]) < 0) {
 			// TODO Enhance error reporting
 			perror("execvp() failed");
 			exit(0);
 		}
 	} else {
+		dup2(stdin_saved, STDIN_FILENO);
+		close(stdin_saved);
 		waitpid(f, NULL, 0);
 	}
 
