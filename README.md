@@ -12,6 +12,11 @@ My goal with this project is to learn about UNIX/Linux internals. Here are some 
 
 There is much, much more to say about a shell. I consider these to be part of a shell's core functionality, so I'll start by working on them.
 
+## TODO
+
+- [ ] Improve error handling
+- [ ] Rewrite the parser using proper tools
+
 ## Installation and Usage
 
 The shell is very primitive right now; it can be compiled and executed as any other program.
